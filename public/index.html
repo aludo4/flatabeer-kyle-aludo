@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beers</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f2f2f2;
+        }
+
+        .body {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        nav {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #beerDetails {
+            border-top: 2px solid #ddd;
+            padding-top: 20px;
+        }
+
+        form {
+            margin-top: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+
+        button[type="submit"] {
+            background-color: #008CBA;
+            color: white;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #007B9E;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+  <div class="body">
+    <h1>Beers</h1>
+    <nav id="beerMenu"></nav>
+    <div id="beerDetails"></div>
+    <form id="reviewForm">
+      <label for="newReview">Add a New Review:</label>
+      <input type="text" id="newReview" name="newReview" required>
+      <button type="submit">Submit Review</button>
+    </form>
+  </div>
+
+  <script>
+    let beersData;
+
+    // Function to display beer details
+    const displayBeerDetails = (beer) => {
+      const beerDetails = document.getElementById('beerDetails');
+      beerDetails.innerHTML = `
+        <h2>${beer.name}</h2>
+        <p>Description: ${beer.description}</p>
+        <img src="${beer.image_url}" alt="${beer.name}">
+        <h3>Reviews:</h3>
+        <ul>
+          ${beer.reviews.map(review => `<li>${review}</li>`).join('')}
+        </ul>
+      `;
+    };
+
+    // Function to display beer menu
+    const displayBeerMenu = () => {
+      const beerMenu = document.getElementById('beerMenu');
+      beersData.forEach(beer => {
+        const menuItem = document.createElement('div');
+        // Change the line below
+        menuItem.innerHTML = `<button onclick="displayBeerDetails('${JSON.stringify(beer)}')">${beer.name}</button>`;
+        beerMenu.appendChild(menuItem);
+      });
+    };
+
+    // Fetch data from the JSON server on port 3000
+    fetch('http://localhost:3000/beers')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(beers => {
+        beersData = beers;
+        displayBeerDetails(beers[0]); // Display details of the first beer by default
+        displayBeerMenu(); // Display the menu of all beers
+
+        const reviewForm = document.getElementById('reviewForm');
+        reviewForm.addEventListener('submit', (event) => {
+          event.preventDefault();
+          const newReviewInput = document.getElementById('newReview');
+          const newReview = newReviewInput.value;
+          // Add the new review to the displayed details (no persistence needed)
+          const currentBeerDetails = document.getElementById('beerDetails');
+          currentBeerDetails.querySelector('ul').innerHTML += `<li>${newReview}</li>`;
+          newReviewInput.value = ''; // Clear the input field
+        });
+      })
+      .catch(error => console.error('Error fetching data:', error));
+  </script>
+
+</body>
+</html>
